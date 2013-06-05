@@ -1,5 +1,5 @@
-===========================================Yasoob's Soundcloud Downloader============================================
-
+Yasoob's Soundcloud Downloader:
+===============================
 This is a simple soundcloud searcher and downloader i wrote in python. 
 It requires the requests library and uses wget for downloading the songs.
 The script is well documented and will help a new python programmer to understand it as well.

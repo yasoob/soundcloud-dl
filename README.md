@@ -7,11 +7,11 @@ I hope that you guys like my work. As a token of appreciation you can star this 
 It is inspired by https://github.com/jacktheripper51/groove-dl
 
 ###Syntax:
->> CLI: soundcloud-dl.py
+```CLI: soundcloud-dl.py```
 
 ###Dependencies:
 * Python 2.6
-* Requests library
+* Requests library (I will try to remove this dependency.)
 * Wget (preinstalled in linux) for downloading.
   
 ###Authors:

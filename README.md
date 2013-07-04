@@ -1,8 +1,8 @@
 Yasoob's Soundcloud Downloader:
 ===============================
 This is a simple soundcloud searcher and downloader i wrote in python. 
-It requires the requests library and uses wget for downloading the songs.
-The script is well documented and will help a new python programmer to understand it as well.
+It requires the requests library .The script is well documented and
+will help a new python programmer to understand it as well.
 I hope that you guys like my work. As a token of appreciation you can star this project.
 It is inspired by https://github.com/jacktheripper51/groove-dl
 
@@ -12,7 +12,6 @@ It is inspired by https://github.com/jacktheripper51/groove-dl
 ###Dependencies:
 * Python 2.6
 * Requests library (I will try to remove this dependency.)
-* Wget (preinstalled in linux) for downloading.
   
 ###Authors:
 * M.Yasoob

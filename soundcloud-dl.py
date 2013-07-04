@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
-import soundcloud_api
+import soundcloud
 import requests
 import os
 import subprocess
@@ -26,7 +26,7 @@ def song_search(song_name, result_count=20):
 
     # here we are making the tracks variable global so that we can access it outside this method
     global tracks
-    client = soundcloud_api.Client(client_id='b45b1aa10f1ac2941910a7f0d10f8e28')
+    client = soundcloud.Client(client_id='b45b1aa10f1ac2941910a7f0d10f8e28')
     try:
         tracks = client.get('/tracks', q=song_name, limit=result_count)
     except requests.exceptions.HTTPError:
@@ -60,6 +60,43 @@ def convertSize(n, format='%(value).1f %(symbol)s', symbols='customary'):
             value = float(n) / prefix[symbol]
             return format % locals()
     return format % dict(symbol=symbols[0], value=n)
+
+# this is our downloader
+def downloader(url,filename):
+    import urllib2
+    ## DEFINE THE FULL URL OF FILE YOU WANT TO GRAB HERE 
+    fileurl = url
+     
+    ## File name carving
+    file_name = filename
+     
+    ##Initiate download
+    u = urllib2.urlopen(fileurl)
+    f = open(file_name, 'wb')
+    meta = u.info()
+    file_size = int(meta.getheaders("Content-Length")[0])
+    print "Downloading %s (%s bytes)" %(file_name, file_size)
+     
+    #Calculate downloaded filesize
+    file_size_dl = 0
+    block_size = 8192
+     
+    #Download loop
+    while True:
+        buffer = u.read(block_size)
+        if not buffer:
+            break
+     
+        file_size_dl += len(buffer)
+        f.write(buffer)
+        status = r"%s [%3.2f%%]" % (convertSize(file_size_dl), file_size_dl * 100. / file_size)
+        status = status + chr(8)*(len(status)+1)
+        #print status
+        sys.stdout.write("\r        %s" % status)
+        sys.stdout.flush()
+     
+    #Download done. Close file stream
+    f.close()
 
 # this method converts the time in milliseconds to human readable format.
 def convertTime(ms):
@@ -111,11 +148,12 @@ def extract_data(url):
     # We will open this url and soundcloud will give 
     # us all the information about the song except its main download url.
     resolv_url = 'http://api.soundcloud.com/resolve.json?url=' + url + '&client_id=b45b1aa10f1ac2941910a7f0d10f8e28'
-        
+
     print u'Resolving the given url...'
     info_json = requests.get(resolv_url, headers=htmlclient).text
     
     info = json.loads(info_json)
+
     video_id = info['id']
 
     # we are opening another url and hopefully this will be the last url
@@ -129,6 +167,7 @@ def extract_data(url):
 		sys.exit()
 
     streams = json.loads(stream_json)
+
     mediaURL = streams['http_mp3_128_url']
     upload_date = info['created_at']
 
@@ -178,7 +217,10 @@ if __name__ == '__main__':
     # here we are looping over the dictionary 
     for k,i in enumerate(result):
         # and printing the results on screen
-        print str(k+1) + ": "+result[i]['title']+" --by-- " +result[i]['uploader']
+        try:
+            print str(k+1) + ": "+result[i]['title']+" --by-- " +result[i]['uploader']
+        except:
+            pass
 
     # here we are asking the user which song he wants to download
     user_choice = raw_input('\nEnter the Song ID you wish to download or (q) to exit: ')
@@ -188,14 +230,11 @@ if __name__ == '__main__':
 
     # here we are running the extract_data method according to the user_choice variable
     extract_data(result[int(user_choice)]['url'])
-    
+
     # looping over the final results received after resolving the url
     for i in final_result: 
-        cmd = 'wget -O "%s.mp3" "%s" "--no-check-certificate"' % (i['title'],i['url']) #Run wget to download the song
-        p = subprocess.Popen(cmd, shell=True)
         try:
-            p.wait() #Wait for wget to finish
+            downloader(i['url'],i['title']+".mp3")
         except KeyboardInterrupt: #If we are interrupted by the user
-            os.remove('%s.mp3' %(i['title'])) #Delete the song
-            print "\nDownload cancelled. File deleted."
+            print "\nDownload cancelled by the user. "
     # Natural exit

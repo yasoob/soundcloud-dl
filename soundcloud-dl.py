@@ -18,6 +18,27 @@ entrystring = \
 _useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.56 Safari/536.5"
 htmlclient = {"User-Agent":_useragent, "Content-Type":"application/json", "Accept-Encoding":"gzip"}
 
+# Do a search for the songs of a specific user and return the results
+def user_song_search(user_name):
+    """This method uses the soundcloud api to search for songs uploaded by a specific
+    user on soundcloud. It provides the result in a json format and you can access all the data of
+    the songs."""
+
+    global tracks
+    client = soundcloud.Client(client_id='b45b1aa10f1ac2941910a7f0d10f8e28')
+
+    # here we are first resolving the artist's url and retrieving its id from soundcloud
+    user_name = 'http://soundcloud.com/%s' %(user_name)
+    id_search = client.get('/resolve', url=user_name) 
+    userid = id_search.id
+    
+    try:
+        tracks = client.get('/users/%s/tracks'% (userid))
+    except requests.exceptions.HTTPError:
+        print "Check your internet connection"
+        exit()
+
+
 # Do a search for the given query and return the results 
 def song_search(song_name, result_count=20):
     """This method uses the soundcloud api to search for songs on soundcloud.
@@ -120,7 +141,7 @@ def convertTime(ms):
         return "%s hours %s min %s sec" %(str(hours),str(minutes),str(seconds))
 
 # Retrieve all the information from a soundcloud url
-def extract_data(url):
+def extract_data(url,video_id,title):
     """ This method takes a soundcloud song url as an input and then opens
     various urls in order to find out the actual url of the soundcloud music file."""
     global final_result
@@ -144,18 +165,6 @@ def extract_data(url):
     # here we are just simply recreating the url
     url = 'http://soundcloud.com/%s/%s' % (uploader, slug_title)
 
-    # here we are making the "resolve" url. 
-    # We will open this url and soundcloud will give 
-    # us all the information about the song except its main download url.
-    resolv_url = 'http://api.soundcloud.com/resolve.json?url=' + url + '&client_id=b45b1aa10f1ac2941910a7f0d10f8e28'
-
-    print u'Resolving the given url...'
-    info_json = requests.get(resolv_url, headers=htmlclient).text
-    
-    info = json.loads(info_json)
-
-    video_id = info['id']
-
     # we are opening another url and hopefully this will be the last url
     # this url will give us the actual link to the mp3 file
     streams_url = 'https://api.sndcdn.com/i1/tracks/' + str(video_id) + '/streams?client_id=b45b1aa10f1ac2941910a7f0d10f8e28'
@@ -169,25 +178,15 @@ def extract_data(url):
     streams = json.loads(stream_json)
 
     mediaURL = streams['http_mp3_128_url']
-    upload_date = info['created_at']
-
+    
     # and finally here are the final results in json format
     final_result = [{
-        'id':       info['id'],
         'url':      mediaURL,
-        'uploader': info['user']['username'],
-        'upload_date': upload_date,
-        'title':    info['title'],
-        'ext':      u'mp3',
-        'description': info['description'],
+        'title':    title,
     }]	
 
-# this tells us weather the script was directly run or not.
-# If it is directly run then the code bellow this comment executes.
-if __name__ == '__main__':
-    print entrystring
-
-    # we are asking the user which song does he want to download.
+def for_song():
+     # we are asking the user which song does he want to download.
     song = raw_input("[Soundcloud-dl]  Which song do you want?\t")
     print "Searching for '%s'..."%(song)
     
@@ -205,6 +204,7 @@ if __name__ == '__main__':
     for i in tracks:    
         #another dictionary for holding all the results for a specific song
         result[count] = {}
+        result[count]['id'] = i.id
         result[count]['title'] = i.title
         result[count]['uploader'] = i.user['username']
         result[count]['duration'] = convertTime(i.duration)
@@ -214,13 +214,17 @@ if __name__ == '__main__':
         # here we are incrementing the count variable by 1 everytime the loop runs
         count += 1
 
+    # this variable contains words which can be included in the valid file name
+    # we are doing this because if we donot filter out bad words then we receive 
+    # an error on windows >:( 
+    valid_chars = '-_.() abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    
     # here we are looping over the dictionary 
     for k,i in enumerate(result):
         # and printing the results on screen
-        try:
-            print str(k+1) + ": "+result[i]['title']+" --by-- " +result[i]['uploader']
-        except:
-            pass
+        songTitle = ''.join(c for c in result[i]['title'] if c in valid_chars)
+        Artist = ''.join(c for c in result[i]['uploader'] if c in valid_chars)
+        print str(k+1) + ": "+songTitle+" --by-- " +Artist
 
     # here we are asking the user which song he wants to download
     user_choice = raw_input('\nEnter the Song ID you wish to download or (q) to exit: ')
@@ -229,7 +233,7 @@ if __name__ == '__main__':
     if user_choice == "" or user_choice == "q": exit() 
 
     # here we are running the extract_data method according to the user_choice variable
-    extract_data(result[int(user_choice)]['url'])
+    extract_data(result[int(user_choice)]['url'],result[int(user_choice)]['id'],result[int(user_choice)]['title'])
 
     # looping over the final results received after resolving the url
     for i in final_result: 
@@ -237,4 +241,91 @@ if __name__ == '__main__':
             downloader(i['url'],i['title']+".mp3")
         except KeyboardInterrupt: #If we are interrupted by the user
             print "\nDownload cancelled by the user. "
-    # Natural exit
+    sys.exit()
+
+def for_user():
+     # we are asking the user which song does he want to download.
+    song = raw_input("[Soundcloud-dl]  Which user do you want?\t")
+    print "Searching for '%s'..."%(song)
+    
+    # here we are running the search method using the given query
+    user_song_search(song)
+    
+    #default dictionary for holding the results
+    result = {}
+
+    # a variable simply to keep track of the songs
+    # this variable will allows us to retrieve back the song which the user demands.
+    count = 1
+
+    # simply looping over the tracks variable produced by song_search method and assigning it to a dictionary
+    for i in tracks:    
+        #another dictionary for holding all the results for a specific song
+        result[count] = {}
+        result[count]['id'] = i.id
+        result[count]['title'] = i.title
+        result[count]['uploader'] = i.user['username']
+        result[count]['duration'] = convertTime(i.duration)
+        result[count]['size'] = convertSize(i.original_content_size)
+        result[count]['url'] = i.permalink_url 
+
+        # here we are incrementing the count variable by 1 everytime the loop runs
+        count += 1
+
+    valid_chars = '-_.() abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    
+    # here we are looping over the dictionary 
+    for k,i in enumerate(result):
+        # and printing the results on screen
+        songTitle = ''.join(c for c in result[i]['title'] if c in valid_chars)
+        Artist = ''.join(c for c in result[i]['uploader'] if c in valid_chars)
+        print str(k+1) + ": "+songTitle+" --by-- " +Artist
+
+    # here we are asking the user which song he wants to download
+    user_choice = raw_input('\n[Soundcloud-dl]  Enter the Song ID you wish to download or (q) to exit or (all) to download all songs: ')
+
+    #Exit if choice is empty or q
+    if user_choice == "" or user_choice == "q": 
+        sys.exit() 
+    elif user_choice == "all":
+        for count,i in enumerate(result):
+            try:
+                extract_data(result[i]['url'],result[i]['id'],result[i]['title'])
+                for i in final_result: 
+                    downloader(i['url'],i['title']+".mp3")
+                print "[Soundcloud-dl]  Downloaded %s songs\n" %(str(count+1))
+            except KeyboardInterrupt: #If we are interrupted by the user
+                print "\n[Soundcloud-dl]  Download cancelled by the user. "    
+                sys.exit()
+    else:
+        # here we are running the extract_data method according to the user_choice variable
+        extract_data(result[int(user_choice)]['url'])
+
+        # looping over the final results received after resolving the url
+        for i in final_result: 
+            try:
+                downloader(i['url'],i['title']+".mp3")
+            except KeyboardInterrupt: #If we are interrupted by the user
+                print "\n[Soundcloud-dl]  Download cancelled by the user. "
+        sys.exit()
+
+# this tells us weather the script was directly run or not.
+# If it is directly run then the code bellow this comment executes.
+if __name__ == '__main__':
+    print entrystring
+
+    # we are asking the user that whether he wants to search for a song or a user
+    print "[Soundcloud-dl]  Do you want to search for a song or do you want to download the songs by a specific user? Type in 'song' or 'user' according to your requirement."
+    what = raw_input("[Soundcloud-dl]  Your choice?\t")
+
+    # here we are using a simple for loop to check whether the user typed song, user or anything else.
+    # And after that we are running the specified functions for each choice
+    if what == "song" :
+        for_song()
+    elif what == "user":
+        for_user()
+    else:
+        print "[Soundcloud-dl]  your choice was wrong please run the program again\n"
+        sys.exit()
+
+   

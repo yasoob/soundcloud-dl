@@ -22,7 +22,7 @@ def single_url(url):
     """ This method is same as extract_data() (located further down the page) method but in this method we are opening two urls to obtain
     all the required information about a soundcloud url. It takes only a soundcloud song url as an input and then opens
     various urls in order to find out the actual url of the soundcloud music file."""
-    global final_result
+    
     _VALID_URL = r'^(?:https?://)?(?:www\.)?soundcloud\.com/([\w\d-]+)/([\w\d-]+)'
 
     # checking weather the given url is a valid soundcloud url or not
@@ -69,7 +69,7 @@ def single_url(url):
     upload_date = info['created_at']
 
     # and finally here are the final results in json format
-    final_result = {
+    return {
         'id':       info['id'],
         'url':      mediaURL,
         'uploader': info['user']['username'],
@@ -78,7 +78,6 @@ def single_url(url):
         'ext':      u'mp3',
         'description': info['description'],
     }
-
 
 # Do a search for the songs of a specific user and return the results
 def user_song_search(user_name):
@@ -375,7 +374,7 @@ def for_url():
     # we are asking the user which song does he want to download.
     song = raw_input("[Soundcloud-dl]  Which url do you want to download?\t")
     print "[Soundcloud-dl]  Extracting info about the url..."
-    single_url(song)
+    final_result = single_url(song)
     url = final_result['url']
     title = final_result['title']
     try:

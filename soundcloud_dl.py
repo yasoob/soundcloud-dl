@@ -3,10 +3,6 @@ import sys
 import re
 import soundcloud
 import requests
-import os
-import subprocess
-import math
-import threading
 if sys.version_info[1] >= 6:  import json
 else: import simplejson as json
 

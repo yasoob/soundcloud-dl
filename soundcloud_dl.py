@@ -284,10 +284,21 @@ def for_song():
         print str(k+1) + ": "+songTitle+" --by-- " +Artist
 
     # here we are asking the user which song he wants to download
-    user_choice = raw_input('\nEnter the Song ID you wish to download or (q) to exit: ')
+    user_choice = raw_input('\nEnter the Song ID you wish to download or (all) to download all songs or (q) to exit: ')
 
     #Exit if choice is empty or q
     if user_choice == "" or user_choice == "q": exit() 
+
+    elif user_choice == "all":
+        for count,i in enumerate(result):
+            try:
+                extract_data(result[i]['url'],result[i]['id'],result[i]['title'])
+                for i in final_result: 
+                    downloader(i['url'],i['title']+".mp3")
+                print "[Soundcloud-dl]  Downloaded %s songs\n" %(str(count+1))
+            except KeyboardInterrupt: #If we are interrupted by the user
+                print "\n[Soundcloud-dl]  Download cancelled by the user. "    
+                sys.exit()
 
     # here we are running the extract_data method according to the user_choice variable
     extract_data(result[int(user_choice)]['url'],result[int(user_choice)]['id'],result[int(user_choice)]['title'])
@@ -386,12 +397,12 @@ if __name__ == '__main__':
     print entrystring
 
     # we are asking the user that whether he wants to search for a song or a user
-    print "[Soundcloud-dl]  Do you want to search for a song or download the songs by a specific user or want to download a song by giving it's url ? Type in 'song' or 'user' or 'url' according to your requirement."
+    print "[Soundcloud-dl]  Do you want to search for a song or download the songs by a specific user or want to download a song by giving it's url ? Type in 'search' or 'user' or 'url' according to your requirement."
     what = raw_input("[Soundcloud-dl]  Your choice?\t")
 
     # here we are using a simple for loop to check whether the user typed song, user or anything else.
     # And after that we are running the specified functions for each choice
-    if what == "song" :
+    if what == "search" :
         for_song()
     elif what == "user":
         for_user()

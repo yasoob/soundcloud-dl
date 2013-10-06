@@ -14,7 +14,7 @@ request and then i will merge it.
 
 ###Dependencies:
 * Python 2.6
-* Requests library (I will try to remove this dependency.)
+* Requests library 
 
 ###Tests:
 I have included a test which will only run if you have pytest installed. Currently I am testing only a single function. With time i will add tests for other functions as well. If you don't have pytest installed then you can install it by typing ```pip install pytest``` or ```easy_install pytest```.

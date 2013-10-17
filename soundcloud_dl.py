@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 import sys
 import re
-
 import requests
-
 import soundcloud
-
-
 if sys.version_info[1] >= 6:
     import json
 else:

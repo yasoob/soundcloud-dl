@@ -27,3 +27,6 @@ I'm not responsible for any violations this script does to Soundcloud's TOS. It'
 proof of concept.
 
 Python script by M.Yasoob Khalid <yasoob.khld@gmail.com>
+
+###TODO:
+Add a nice GUI with PyQt, PySide or wxPython. If you want to contribute then I think this is the best thing to contribute.

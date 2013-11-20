@@ -31,3 +31,4 @@ Python script by M.Yasoob Khalid <yasoob.khld@gmail.com>
 ###TODO:
 * Add a nice GUI with PyQt, PySide or wxPython. If you want to contribute then I think this is the best thing to contribute.
 * Use argparse module for getting the input
+* Do some code refractory so that it uses the best practices.

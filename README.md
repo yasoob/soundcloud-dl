@@ -33,8 +33,11 @@ proof of concept.
 
 Python script by M.Yasoob Khalid <yasoob.khld@gmail.com>
 
+This project hasn't been tested in a while so use it at your own risk.
+
 ### TODO:
 
 * Add a nice GUI with PyQt, PySide or wxPython. If you want to contribute then I think this is the best thing to contribute.
 * Use argparse module for getting the input
 * Do some code refractory so that it uses the best practices.
+

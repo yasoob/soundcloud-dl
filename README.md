@@ -9,26 +9,32 @@ I was not able to find a good python script for downloading songs from soundclou
 to contribute then just clone this repo and submit a pull request. I will review your pull 
 request and then i will merge it.
 
-###Syntax:
+### Syntax:
+
 ```CLI: soundcloud_dl.py```
 
-###Dependencies:
+### Dependencies:
+
 * Python 2.6
 * Requests library 
 
-###Tests:
+### Tests:
+
 I have included a test which will only run if you have pytest installed. Currently I am testing only a single function. With time i will add tests for other functions as well. If you don't have pytest installed then you can install it by typing ```pip install pytest``` or ```easy_install pytest```.
 
-###Authors:
+### Authors:
+
 * M.Yasoob
 
-###Disclaimer:
+### Disclaimer:
+
 I'm not responsible for any violations this script does to Soundcloud's TOS. It's more of a
 proof of concept.
 
 Python script by M.Yasoob Khalid <yasoob.khld@gmail.com>
 
-###TODO:
+### TODO:
+
 * Add a nice GUI with PyQt, PySide or wxPython. If you want to contribute then I think this is the best thing to contribute.
 * Use argparse module for getting the input
 * Do some code refractory so that it uses the best practices.
